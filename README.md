@@ -15,9 +15,6 @@ Example playbook:
 
     - when: my_playbook_mariadb_installation_enabled | bool
       role: galaxy/com.devture.ansible.role.mariadb
-      tags:
-        - setup-mariadb
-        - setup-all
 
     - role: another_role
 ```
