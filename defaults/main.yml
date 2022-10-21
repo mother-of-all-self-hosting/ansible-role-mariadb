@@ -1,0 +1,26 @@
+---
+
+# devture_mariadb_identifier controls the identifer of this MariaDB instance, which influences:
+# - the default storage path
+# - the names of systemd services
+# - the names of various helper scripts
+# - the names of temporary files
+devture_mariadb_identifier: 'devture-mariadb'
+
+devture_mariadb_container_image: "docker.io/mariadb:10.9.3-jammy"
+
+devture_mariadb_container_network: ~
+
+devture_mariadb_base_path: "/{{ devture_mariadb_identifier }}"
+devture_mariadb_data_path: "{{ devture_mariadb_base_path }}/data"
+devture_mariadb_bin_path: "{{ devture_mariadb_base_path }}/bin"
+
+devture_mariadb_uid: ~
+devture_mariadb_gid: ~
+
+devture_mariadb_db_name: ''
+devture_mariadb_root_passsword: ''
+devture_mariadb_db_username: ''
+devture_mariadb_db_password: ''
+
+devture_mariadb_systemd_required_services_list: ['docker.service']

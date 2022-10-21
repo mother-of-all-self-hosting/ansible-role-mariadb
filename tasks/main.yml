@@ -1,0 +1,13 @@
+---
+
+- when: devture_mariadb_enabled | bool
+  block:
+    - ansible.builtin.import_tasks: "{{ role_path }}/tasks/validate_config.yml"
+      tags:
+        - setup-mariadb
+        - setup-all
+
+    - ansible.builtin.import_tasks: "{{ role_path }}/tasks/setup.yml"
+      tags:
+        - setup-mariadb
+        - setup-all

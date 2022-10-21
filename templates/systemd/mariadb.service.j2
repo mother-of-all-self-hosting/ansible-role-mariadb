@@ -1,0 +1,34 @@
+[Unit]
+Description=MariaDB ({{ devture_mariadb_identifier }})
+{% for service in devture_mariadb_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ devture_mariadb_identifier }} 2>/dev/null'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ devture_mariadb_identifier }} 2>/dev/null'
+
+ExecStart=/usr/bin/docker run \
+			--rm \
+			--name {{ devture_mariadb_identifier }} \
+			--log-driver=none \
+			--user={{ gitea_uid }}:{{ gitea_gid }} \
+			--network={{ devture_mariadb_container_network }} \
+			--env-file={{ devture_mariadb_base_path }}/env \
+			--mount type=bind,src={{ devture_mariadb_data_path }},dst=/var/lib/mariadb \
+			--mount type=bind,src={{ devture_mariadb_base_path }}/my.cnf,dst=/root/.my.cnf,ro \
+			--tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+			{{ devture_mariadb_container_image }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ devture_mariadb_identifier }} 2>/dev/null'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ devture_mariadb_identifier }} 2>/dev/null'
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ devture_mariadb_identifier }}
+
+[Install]
+WantedBy=multi-user.target

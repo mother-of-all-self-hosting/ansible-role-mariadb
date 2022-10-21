@@ -1,0 +1,9 @@
+#!/bin/bash
+
+docker run \
+	-it \
+	--rm \
+	--mount type=bind,src={{ devture_mariadb_base_path }}/my.cnf,dst=/root/.my.cnf,ro \
+	--network={{ devture_mariadb_container_network }} \
+	{{ devture_mariadb_container_image }} \
+	mariadb --defaults-extra-file=/root/.my.cnf -h {{ devture_mariadb_identifier }} {{ devture_mariadb_db_name }}

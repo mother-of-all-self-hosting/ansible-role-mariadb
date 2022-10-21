@@ -1,0 +1,16 @@
+---
+
+- name: Fail if required MariaDB settings not defined
+  fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) for using this role.
+  when: "vars[item] == ''"
+  with_items:
+    - devture_mariadb_identifier
+    - devture_mariadb_uid
+    - devture_mariadb_gid
+    - devture_mariadb_container_network
+    - devture_mariadb_db_name
+    - devture_mariadb_root_passsword
+    - devture_mariadb_db_username
+    - devture_mariadb_db_password
