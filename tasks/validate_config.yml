@@ -10,7 +10,4 @@
     - mariadb_uid
     - mariadb_gid
     - mariadb_container_network
-    - mariadb_db_name
     - mariadb_root_passsword
-    - mariadb_db_username
-    - mariadb_db_password

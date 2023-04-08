@@ -9,6 +9,7 @@
     group: "{{ mariadb_gid }}"
   with_items:
     - "{{ mariadb_base_path }}"
+    - "{{ mariadb_bin_path }}"
     - "{{ mariadb_data_path }}"
 
 - name: Ensure MariaDB configuration files created
@@ -25,7 +26,7 @@
 - name: Ensure MariaDB scripts created
   ansible.builtin.template:
     src: "{{ role_path }}/templates/bin/{{ item }}.j2"
-    dest: "{{ mariadb_bin_path }}/bin/{{ item }}"
+    dest: "{{ mariadb_bin_path }}/{{ item }}"
     mode: 0750
   with_items:
     - cli
