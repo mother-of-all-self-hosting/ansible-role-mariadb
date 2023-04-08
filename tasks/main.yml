@@ -1,13 +1,20 @@
 ---
 
-- when: devture_mariadb_enabled | bool
-  block:
-    - ansible.builtin.import_tasks: "{{ role_path }}/tasks/validate_config.yml"
-      tags:
-        - setup-mariadb
-        - setup-all
+- block:
+    - when: mariadb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
 
-    - ansible.builtin.import_tasks: "{{ role_path }}/tasks/setup.yml"
-      tags:
-        - setup-mariadb
-        - setup-all
+    - when: mariadb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+  tags:
+    - setup-all
+    - setup-mariadb
+    - install-all
+    - install-mariadb
+
+- block:
+    - when: not mariadb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+  tags:
+    - setup-all
+    - setup-mariadb

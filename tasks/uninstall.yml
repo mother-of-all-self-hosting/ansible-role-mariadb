@@ -1,0 +1,25 @@
+---
+
+- name: Check existence of MariaDB systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
+  register: mariadb_service_stat
+
+- when: mariadb_service_stat.stat.exists | bool
+  block:
+    - name: Ensure MariaDB systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ mariadb_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure MariaDB systemd service does not exist
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
+        state: absent
+
+    - name: Ensure MariaDB path doesn't exist
+      ansible.builtin.file:
+        path: "{{ mariadb_base_path }}"
+        state: absent
