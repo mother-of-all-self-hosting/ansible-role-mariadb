@@ -6,5 +6,5 @@
 	--cap-drop=ALL \
 	--mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro \
 	--network={{ mariadb_container_network }} \
-	{{ mariadb_container_image }} \
+	{{ mariadb_container_image_to_use }} \
 	mysql --defaults-file=/my.cnf -h {{ mariadb_identifier }} {{ mariadb_db_name }}

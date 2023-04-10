@@ -10,8 +10,6 @@ mariadb_enabled: true
 # - the name of the main container network
 mariadb_identifier: 'mariadb'
 
-mariadb_version: 10.11.2
-
 mariadb_uid: ''
 mariadb_gid: ''
 
@@ -19,10 +17,16 @@ mariadb_base_path: "/{{ mariadb_identifier }}"
 mariadb_data_path: "{{ mariadb_base_path }}/data"
 mariadb_bin_path: "{{ mariadb_base_path }}/bin"
 
-mariadb_container_image: "{{ mariadb_container_image_registry_prefix }}mariadb:{{ mariadb_container_image_tag }}"
-mariadb_container_image_tag: "{{ mariadb_version }}-jammy"
-mariadb_container_image_force_pull: "{{ mariadb_container_image.endswith(':latest') }}"
 mariadb_container_image_registry_prefix: docker.io/
+
+mariadb_container_image_v10_10: "{{ mariadb_container_image_registry_prefix }}mariadb:10.10.3"
+mariadb_container_image_v10_11: "{{ mariadb_container_image_registry_prefix }}mariadb:10.11.2"
+mariadb_container_image_latest: "{{ mariadb_container_image_v10_11 }}"
+
+# This variable is assigned at runtime. Overriding its value has no effect.
+mariadb_container_image_to_use: '{{ mariadb_container_image_latest }}'
+
+mariadb_container_image_force_pull: "{{ mariadb_container_image_to_use.endswith(':latest') }}"
 
 mariadb_container_network: "{{ mariadb_identifier }}"
 
@@ -71,8 +75,10 @@ mariadb_managed_databases_default_collation: utf8mb4_unicode_ci
 # The number of seconds to wait after starting the MariaDB systemd service
 # and before trying to run queries for initializing managed databases/users against it.
 #
-# For most (subsequent) runs, Postgres would already be running, so no waiting will be happening at all.
-mariadb_managed_databases_service_start_wait_timeout_seconds: "{{ 15 }}"
+# For most (subsequent) runs, MariaDB would already be running, so no waiting will be happening at all.
+mariadb_managed_databases_service_start_wait_timeout_seconds: 15
+
+mariadb_systemd_services_to_stop_for_maintenance_list: []
 
 mariadb_systemd_required_services_list: "{{ mariadb_systemd_required_services_list_default + mariadb_systemd_required_services_list_auto + mariadb_systemd_required_services_list_custom }}"
 mariadb_systemd_required_services_list_default: ['docker.service']

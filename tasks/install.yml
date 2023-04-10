@@ -31,11 +31,37 @@
   with_items:
     - cli
     - cli-non-interactive
-    - dump
+    - dump-all
+
+- ansible.builtin.import_tasks: "{{ role_path }}/tasks/detect_existing_version.yml"
+
+# If we have found an existing version (installed from before), we use its corresponding container image.
+# If not, we install using the latest MariaDB.
+#
+# Upgrading is supposed to be performed separately and explicitly (see `upgrade_mariadb.yml`).
+- ansible.builtin.set_fact:
+    mariadb_container_image_to_use: "{{ mariadb_container_image_latest if mariadb_detected_version_corresponding_container_image == '' else mariadb_detected_version_corresponding_container_image }}"
+
+- name: Abort if on an unsupported MariaDB version
+  ansible.builtin.fail:
+    msg: "You're on MariaDB {{ mariadb_detected_version }}, which is no longer supported."
+  when: "mariadb_detected_version.startswith('10.9.')"
+
+- name: Inject warning if on an old version of MariaDB
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "NOTE: Your setup is on an old MariaDB version ({{ mariadb_container_image_to_use }}), while {{ mariadb_container_image_latest }} is supported. You will be able to upgrade using --tags=upgrade-mariadb in the future. For now, upgrades are not supported"
+        ]
+      }}
+  when: "mariadb_container_image_to_use != mariadb_container_image_latest"
 
 - name: Ensure MariaDB container image is pulled
   community.docker.docker_image:
-    name: "{{ mariadb_container_image }}"
+    name: "{{ mariadb_container_image_to_use }}"
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
     force_source: "{{ mariadb_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
     force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else mariadb_container_image_force_pull }}"
