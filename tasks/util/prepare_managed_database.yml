@@ -1,0 +1,41 @@
+---
+
+# It'd be better if this is belonged to `validate_config.yml`, but it would have to be some loop-within-a-loop there,
+# and that's ugly. We also don't expect this to catch errors often. It's more of a defensive last-minute check.
+- name: Fail if managed database data appears invalid
+  ansible.builtin.fail:
+    msg: "Managed database definition ({{ managed_db }} lacks a required key: {{ item }}"
+  when: "item not in managed_db"
+  with_items: "{{ ['name', 'username', 'password'] }}"
+
+# The SQL statements that we'll run against MariaDB are stored in a file that others can't read.
+# This file will be mounted into the container and fed to MariaDB.
+# This way, we avoid passing sensitive data around in CLI commands that other users on the system can see.
+- name: Create managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/sql/init-managed-db-user-and-role.sql.j2"
+    dest: "/tmp/{{ mariadb_identifier }}-init-managed-db-user-and-role.sql"
+    mode: 0600
+    owner: "{{ mariadb_uid }}"
+    group: "{{ mariadb_gid }}"
+
+- name: Execute MariaDB managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.command:
+    cmd: >-
+      {{ devture_systemd_docker_base_host_command_docker }} run
+      --rm
+      --user={{ mariadb_uid }}:{{ mariadb_gid }}
+      --cap-drop=ALL
+      --network={{ mariadb_container_network }}
+      --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro
+      --mount type=bind,src=/tmp/{{ mariadb_identifier }}-init-managed-db-user-and-role.sql,dst=/{{ mariadb_identifier }}-init-managed-db-user-and-role.sql,ro
+      --entrypoint=/bin/sh
+      {{ mariadb_container_image }}
+      -c
+      'mysql --defaults-file=/my.cnf -h {{ mariadb_identifier }} < {{ mariadb_identifier }}-init-managed-db-user-and-role.sql'
+  changed_when: true
+
+- name: Delete managed database initialization SQL file for {{ managed_db.name }}
+  ansible.builtin.file:
+    path: /tmp/{{ mariadb_identifier }}-init-managed-db-user-and-role.sql
+    state: absent

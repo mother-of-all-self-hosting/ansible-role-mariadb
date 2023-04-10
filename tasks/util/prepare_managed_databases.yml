@@ -1,0 +1,29 @@
+---
+
+- name: Ensure MariaDB is started
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    state: started
+    daemon_reload: true
+  register: mariadb_ensure_started_result
+
+- name: Wait a bit, so that Postgres can start
+  when: mariadb_ensure_started_result.changed | bool
+  ansible.builtin.wait_for:
+    timeout: "{{ mariadb_managed_databases_service_start_wait_timeout_seconds }}"
+  delegate_to: 127.0.0.1
+  become: false
+
+- name: Prepare managed Postgres database
+  ansible.builtin.include_tasks: "{{ role_path }}/tasks/util/prepare_managed_database.yml"
+  with_items: "{{ mariadb_managed_databases }}"
+  loop_control:
+    loop_var: managed_db
+  # Suppress logging to avoid dumping the credentials to the shell
+  no_log: true
+
+- name: Ensure MariaDB is stopped (if it previously was)
+  when: mariadb_ensure_started_result.changed | bool
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    state: stopped

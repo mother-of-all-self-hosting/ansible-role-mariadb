@@ -1,7 +1,6 @@
 #!/bin/bash
 
 {{ devture_systemd_docker_base_host_command_docker }} run \
-	-it \
 	--rm \
 	--user={{ mariadb_uid }}:{{ mariadb_gid }} \
 	--cap-drop=ALL \

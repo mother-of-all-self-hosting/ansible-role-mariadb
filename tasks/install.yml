@@ -30,6 +30,7 @@
     mode: 0750
   with_items:
     - cli
+    - cli-non-interactive
     - dump
 
 - name: Ensure MariaDB container image is pulled
@@ -53,4 +54,12 @@
     src: "{{ role_path }}/templates/systemd/mariadb.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
     mode: 0640
+
+- name: Ensure managed MariaDB databases prepared
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/util/prepare_managed_databases.yml"
+    apply:
+      tags:
+        - always
+  when: "mariadb_managed_databases | length > 0"
 

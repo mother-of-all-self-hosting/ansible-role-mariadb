@@ -37,6 +37,43 @@ mariadb_root_passsword: ''
 mariadb_db_username: ''
 mariadb_db_password: ''
 
+# A list of databases (and their credentials) that this role will create and manage on the server.
+#
+# `mariadb_managed_databases_auto` is managed by the playbook.
+# Your own definitions should go into `mariadb_managed_databases_custom`
+# See `mariadb_managed_databases_custom` for the correct syntax.
+mariadb_managed_databases: "{{ mariadb_managed_databases_auto + mariadb_managed_databases_custom }}"
+
+# Additional/managed database definitions managed by the playbook.
+# To add your own, use `mariadb_managed_databases_custom`
+mariadb_managed_databases_auto: []
+
+# Your own additional/managed database definitions.
+#
+# Also see:
+# - mariadb_managed_databases_default_charset
+# - mariadb_managed_databases_default_collation
+#
+# mariadb_managed_databases_custom:
+#   - name: some_database
+#     username: some_username
+#     password: some_password
+#   - name: another_database
+#     username: another_username
+#     password: another_password
+#     charset: utf8
+#     collation: utf8_general_ci
+mariadb_managed_databases_custom: []
+
+mariadb_managed_databases_default_charset: utf8mb4
+mariadb_managed_databases_default_collation: utf8mb4_unicode_ci
+
+# The number of seconds to wait after starting the MariaDB systemd service
+# and before trying to run queries for initializing managed databases/users against it.
+#
+# For most (subsequent) runs, Postgres would already be running, so no waiting will be happening at all.
+mariadb_managed_databases_service_start_wait_timeout_seconds: "{{ 15 }}"
+
 mariadb_systemd_required_services_list: "{{ mariadb_systemd_required_services_list_default + mariadb_systemd_required_services_list_auto + mariadb_systemd_required_services_list_custom }}"
 mariadb_systemd_required_services_list_default: ['docker.service']
 mariadb_systemd_required_services_list_auto: []

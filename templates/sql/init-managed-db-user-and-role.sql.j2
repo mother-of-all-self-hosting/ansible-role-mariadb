@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS `{{ managed_db.name }}` CHARACTER SET {{ managed_db.charset | default(mariadb_managed_databases_default_charset) }} COLLATE {{ managed_db.collation | default(mariadb_managed_databases_default_collation) }};
+
+CREATE USER IF NOT EXISTS '{{ managed_db.username }}'@'%';
+
+ALTER USER `{{ managed_db.username }}` IDENTIFIED BY '{{ managed_db.password }}';
+
+GRANT ALL PRIVILEGES ON {{ managed_db.name }}.* TO '{{ managed_db.username }}'@'%';
