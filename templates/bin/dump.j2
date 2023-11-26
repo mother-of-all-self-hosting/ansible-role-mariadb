@@ -28,4 +28,4 @@ fi
 	--entrypoint=/bin/bash \
 	{{ mariadb_container_image }} \
 	-c \
-	'set -o pipefail && mariadbdump --defaults-extra-file=/root/.my.cnf -h {{ mariadb_identifier }} {{ mariadb_db_name }} | gzip > /work/latest-dump.sql.gz'
+	'set -o pipefail && {{ mariadb_binary_name_dump }} --defaults-extra-file=/root/.my.cnf -h {{ mariadb_identifier }} {{ mariadb_db_name }} | gzip > /work/latest-dump.sql.gz'

@@ -8,47 +8,48 @@
 
 - name: Initialize MariaDB version determination variables (default to empty)
   ansible.builtin.set_fact:
+    mariadb_detection_mariadb_upgrade_info_path: "{{ mariadb_data_path }}/mariadb_upgrade_info"
     mariadb_detection_mysql_upgrade_info_path: "{{ mariadb_data_path }}/mysql_upgrade_info"
     mariadb_detected_existing: false
     mariadb_detected_version: ""
-    mariadb_detected_version_corresponding_container_image: ""
+    mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_latest }}"
 
-- name: Determine existing MariaDB version (check mysql_upgrade_info file)
+- name: Determine existing MariaDB version (check mariadb_upgrade_info file)
+  ansible.builtin.stat:
+    path: "{{ mariadb_detection_mariadb_upgrade_info_path }}"
+  register: result_mariadb_upgrade_info_stat
+
+- when: not result_mariadb_upgrade_info_stat.stat.exists
+  name: Determine existing MariaDB version (check mysql_upgrade_info file)
   ansible.builtin.stat:
     path: "{{ mariadb_detection_mysql_upgrade_info_path }}"
   register: result_mysql_upgrade_info_stat
 
 - ansible.builtin.set_fact:
-    mariadb_detected_existing: true
-  when: "result_mysql_upgrade_info_stat.stat.exists"
+    mariadb_detected_existing_version_path: "{{ mariadb_detection_mariadb_upgrade_info_path if result_mariadb_upgrade_info_stat.stat.exists else (mariadb_detection_mysql_upgrade_info_path if result_mysql_upgrade_info_stat is defined and result_mysql_upgrade_info_stat.stat.exists else '') }}"
 
-- name: Determine existing MariaDB version (read mysql_upgrade_info file)
-  ansible.builtin.slurp:
-    src: "{{ mariadb_detection_mysql_upgrade_info_path }}"
-  register: result_mysql_upgrade_info
-  when: mariadb_detected_existing | bool
+- when: mariadb_detected_existing_version_path != ''
+  block:
+    - name: Determine existing MariaDB version (read mysql_upgrade_info file)
+      ansible.builtin.slurp:
+        src: "{{ mariadb_detected_existing_version_path }}"
+      register: result_mariadb_upgrade_info
 
-- name: Determine existing MariaDB version (make sense of mysql_upgrade_info file)
-  ansible.builtin.set_fact:
-    mariadb_detected_version: "{{ result_mysql_upgrade_info['content'] | b64decode | replace('\n', '') }}"
-  when: mariadb_detected_existing | bool
+    - name: Determine existing MariaDB version (make sense of mysql_upgrade_info file)
+      ansible.builtin.set_fact:
+        mariadb_detected_version: "{{ result_mariadb_upgrade_info['content'] | b64decode | replace('\n', '') }}"
 
-- name: Determine corresponding container image to detected version (assume default of latest)
-  ansible.builtin.set_fact:
-    mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_latest }}"
-  when: "mariadb_detected_version != ''"
+    - name: Determine container image corresponding to detected version (use 10.10, if detected)
+      ansible.builtin.set_fact:
+        mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v10_10 }}"
+      when: " mariadb_detected_version.startswith('10.10.')"
 
-- name: Determine corresponding container image to detected version (use 10.10, if detected)
-  ansible.builtin.set_fact:
-    mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v10_10 }}"
-  when: " mariadb_detected_version.startswith('10.10.')"
+    - name: Determine container image corresponding to detected version (use 10.11, if detected)
+      ansible.builtin.set_fact:
+        mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v10_11 }}"
+      when: "mariadb_detected_version.startswith('10.11.')"
 
-- name: Determine corresponding container image to detected version (use 10.11, if detected)
-  ansible.builtin.set_fact:
-    mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v10_11 }}"
-  when: "mariadb_detected_version.startswith('10.11.')"
-
-- name: Determine corresponding container image to detected version (use 11.1, if detected)
-  ansible.builtin.set_fact:
-    mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v11_1 }}"
-  when: "mariadb_detected_version.startswith('11.1.')"
+    - name: Determine container image corresponding to detected version (use 11.1, if detected)
+      ansible.builtin.set_fact:
+        mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v11_1 }}"
+      when: "mariadb_detected_version.startswith('11.1.')"

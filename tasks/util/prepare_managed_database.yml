@@ -32,7 +32,7 @@
       --entrypoint=/bin/sh
       {{ mariadb_container_image_to_use }}
       -c
-      'mysql --defaults-file=/my.cnf -h {{ mariadb_identifier }} < {{ mariadb_identifier }}-init-managed-db-user-and-role.sql'
+      '{{ mariadb_binary_name_shell }} --defaults-file=/my.cnf -h {{ mariadb_identifier }} < {{ mariadb_identifier }}-init-managed-db-user-and-role.sql'
   changed_when: true
 
 - name: Delete managed database initialization SQL file for {{ managed_db.name }}
