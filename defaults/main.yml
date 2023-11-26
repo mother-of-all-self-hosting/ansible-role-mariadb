@@ -20,7 +20,7 @@ mariadb_bin_path: "{{ mariadb_base_path }}/bin"
 # This variable points to the mysql/mariadb binary. Newer versions (11.x+) use `mariadb`, not `mysql`.
 # The value may change after runtime checks for version detection run and adjust `mariadb_container_image_to_use`.
 mariadb_binary_name_shell: "{{ 'mysql' if mariadb_container_image_to_use in [mariadb_container_image_v10_11, mariadb_container_image_v10_10] else 'mariadb' }}"
-mariadb_binary_name_dump: "{{ 'mysqldump' if mariadb_binary_name_shell == 'mysql' else 'mariadbdump' }}"
+mariadb_binary_name_dump: "{{ 'mysqldump' if mariadb_binary_name_shell == 'mysql' else 'mariadb-dump' }}"
 
 mariadb_container_image_registry_prefix: docker.io/
 
