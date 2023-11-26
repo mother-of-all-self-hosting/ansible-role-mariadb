@@ -22,7 +22,7 @@ fi
 {{ devture_systemd_docker_base_host_command_docker }} run \
 	$docker_flags \
 	--rm \
-	--mount type=bind,src=$directory_path,dst=/work \
+	--mount type=bind,src=$directory_path,dst=/out \
 	--mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/root/.my.cnf,ro \
 	--network={{ mariadb_container_network }} \
 	--entrypoint=/bin/bash \
