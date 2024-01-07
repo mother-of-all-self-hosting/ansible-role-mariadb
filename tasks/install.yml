@@ -23,16 +23,6 @@
     - env
     - my.cnf
 
-- name: Ensure MariaDB scripts created
-  ansible.builtin.template:
-    src: "{{ role_path }}/templates/bin/{{ item }}.j2"
-    dest: "{{ mariadb_bin_path }}/{{ item }}"
-    mode: 0750
-  with_items:
-    - cli
-    - cli-non-interactive
-    - dump-all
-
 - ansible.builtin.import_tasks: "{{ role_path }}/tasks/detect_existing_version.yml"
 
 # If we have found an existing version (installed from before), we use its corresponding container image.
@@ -46,6 +36,16 @@
   ansible.builtin.fail:
     msg: "You're on MariaDB {{ mariadb_detected_version }}, which is no longer supported."
   when: "mariadb_detected_version.startswith('10.9.')"
+
+- name: Ensure MariaDB scripts created
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/bin/{{ item }}.j2"
+    dest: "{{ mariadb_bin_path }}/{{ item }}"
+    mode: 0750
+  with_items:
+    - cli
+    - cli-non-interactive
+    - dump-all
 
 - name: Inject warning if on an old version of MariaDB
   ansible.builtin.set_fact:
