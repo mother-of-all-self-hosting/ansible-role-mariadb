@@ -94,6 +94,6 @@ mariadb_managed_databases_service_start_wait_timeout_seconds: 15
 mariadb_systemd_services_to_stop_for_maintenance_list: []
 
 mariadb_systemd_required_services_list: "{{ mariadb_systemd_required_services_list_default + mariadb_systemd_required_services_list_auto + mariadb_systemd_required_services_list_custom }}"
-mariadb_systemd_required_services_list_default: ['docker.service']
+mariadb_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 mariadb_systemd_required_services_list_auto: []
 mariadb_systemd_required_services_list_custom: []
