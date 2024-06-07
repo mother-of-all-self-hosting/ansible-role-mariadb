@@ -58,3 +58,8 @@
       ansible.builtin.set_fact:
         mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v11_2 }}"
       when: "mariadb_detected_version.startswith('11.2.')"
+
+    - name: Determine container image corresponding to detected version (use 11.4, if detected)
+      ansible.builtin.set_fact:
+        mariadb_detected_version_corresponding_container_image: "{{ mariadb_container_image_v11_4 }}"
+      when: "mariadb_detected_version.startswith('11.4.')"
