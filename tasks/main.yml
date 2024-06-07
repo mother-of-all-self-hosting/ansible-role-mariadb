@@ -18,3 +18,9 @@
   tags:
     - setup-all
     - setup-mariadb
+
+- block:
+    - when: mariadb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/upgrade.yml"
+  tags:
+    - upgrade-mariadb

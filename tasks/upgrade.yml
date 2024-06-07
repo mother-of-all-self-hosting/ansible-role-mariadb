@@ -1,0 +1,188 @@
+---
+
+- name: Set default mariadb_dump_dir, if not provided
+  ansible.builtin.set_fact:
+    mariadb_dump_dir: "/tmp"
+  when: "mariadb_dump_dir | default('') == ''"
+
+- name: Set mariadb_dump_name, if not provided
+  ansible.builtin.set_fact:
+    mariadb_dump_name: "{{ mariadb_identifier }}-dump.sql.gz"
+  when: "mariadb_dump_name | default('') == ''"
+
+- name: Set mariadb_auto_upgrade_backup_data_path, if not provided
+  ansible.builtin.set_fact:
+    mariadb_auto_upgrade_backup_data_path: "{{ mariadb_data_path }}-auto-upgrade-backup"
+  when: "mariadb_auto_upgrade_backup_data_path | default('') == ''"
+
+- name: Set mariadb_start_wait_time, if not provided
+  ansible.builtin.set_fact:
+    mariadb_start_wait_time: 15
+  when: "mariadb_start_wait_time | default('') == ''"
+
+- name: Set mariadb_force_upgrade, if not provided
+  ansible.builtin.set_fact:
+    mariadb_force_upgrade: false
+  when: "mariadb_force_upgrade | default('') == ''"
+
+- name: Check MariaDB auto-upgrade backup data directory
+  ansible.builtin.stat:
+    path: "{{ mariadb_auto_upgrade_backup_data_path }}"
+  register: result_auto_upgrade_path
+
+- name: Abort, if existing MariaDB auto-upgrade data path detected
+  ansible.builtin.fail:
+    msg: |-
+      Detected that a left-over {{ mariadb_auto_upgrade_backup_data_path }} exists.
+      You should rename it to {{ mariadb_data_path }} if the previous upgrade went wrong, or delete it if it went well.
+  when: "result_auto_upgrade_path.stat.exists"
+
+- name: Detect existing MariaDB version
+  ansible.builtin.import_tasks: tasks/detect_existing_version.yml
+
+- name: Abort, if no existing MariaDB version detected
+  ansible.builtin.fail:
+    msg: "Could not find existing MariaDB installation"
+  when: "not mariadb_detected_existing | bool"
+
+- name: Abort, if already at latest MariaDB version
+  ansible.builtin.fail:
+    msg: "You are already running the latest MariaDB version supported ({{ mariadb_container_image_latest }}). Nothing to do"
+  when: "mariadb_detected_version_corresponding_container_image == mariadb_container_image_latest and not mariadb_force_upgrade"
+
+- ansible.builtin.debug:
+    msg: "Upgrading database from {{ mariadb_detected_version_corresponding_container_image }} to {{ mariadb_container_image_latest }}"
+
+- name: Ensure services are stopped
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+    daemon_reload: true
+  with_items: "{{ mariadb_systemd_services_to_stop_for_maintenance_list }}"
+
+- name: Ensure MariaDB is started
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    state: started
+    daemon_reload: true
+  register: mariadb_ensure_started_result
+
+- when: mariadb_ensure_started_result.changed | bool
+  name: Wait a bit, so that MariaDB can start
+  ansible.builtin.wait_for:
+    timeout: "{{ mariadb_start_wait_time }}"
+  delegate_to: 127.0.0.1
+  become: false
+
+# We dump all databases, roles, etc.
+- name: Perform MariaDB database dump
+  ansible.builtin.command:
+    cmd: >-
+      {{ devture_systemd_docker_base_host_command_docker }} run --rm --name {{ mariadb_identifier }}-dump
+      --log-driver=none
+      --user={{ mariadb_uid }}:{{ mariadb_gid }}
+      --network={{ mariadb_container_network }}
+      --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro
+      --mount type=bind,src={{ mariadb_dump_dir }},dst=/out
+      --entrypoint=/bin/sh
+      {{ mariadb_detected_version_corresponding_container_image }}
+      -c "{{ mariadb_binary_name_dump }}
+      --defaults-file=/my.cnf
+      -h {{ mariadb_identifier }}
+      --all-databases
+      {{ '| gzip -c ' if mariadb_dump_name.endswith('.gz') else '' }}
+      > /out/{{ mariadb_dump_name }}"
+  register: mariadb_upgrade_mariadb_dump_command_result
+  changed_when: mariadb_upgrade_mariadb_dump_command_result.rc == 0
+  tags:
+    - skip_ansible_lint
+
+- name: Ensure MariaDB is stopped
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    state: stopped
+
+- name: Rename existing MariaDB data directory
+  ansible.builtin.command:
+    cmd: "mv {{ mariadb_data_path }} {{ mariadb_auto_upgrade_backup_data_path }}"
+  register: mariadb_upgrade_mariadb_move_command_result
+  changed_when: mariadb_upgrade_mariadb_move_command_result.rc == 0
+
+- ansible.builtin.debug:
+    msg: "NOTE: Your MariaDB data directory has been moved from `{{ mariadb_data_path }}` to `{{ mariadb_auto_upgrade_backup_data_path }}`. In the event of failure, you can move it back and run the playbook with --tags=setup-mariadb to restore operation."
+
+- name: Install MariaDB
+  ansible.builtin.import_tasks: tasks/install.yml
+
+- name: Ensure MariaDB autoruns and is restarted
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    enabled: true
+    state: restarted
+    daemon_reload: true
+
+- name: Wait a bit, so that MariaDB can start
+  ansible.builtin.wait_for:
+    timeout: "{{ mariadb_start_wait_time }}"
+  delegate_to: 127.0.0.1
+  become: false
+
+- name: Generate MariaDB database import command
+  ansible.builtin.set_fact:
+    mariadb_import_command: >-
+      {{ devture_systemd_docker_base_host_command_docker }} run --rm --name {{ mariadb_identifier }}-import
+      --log-driver=none
+      --user={{ mariadb_uid }}:{{ mariadb_gid }}
+      --cap-drop=ALL
+      --network={{ mariadb_container_network }}
+      --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro
+      --entrypoint=/bin/sh
+      --mount type=bind,src={{ mariadb_dump_dir }},dst=/in,ro
+      {{ mariadb_container_image_latest }}
+      -c "cat /in/{{ mariadb_dump_name }} |
+      {{ 'gunzip |' if mariadb_dump_name.endswith('.gz') else '' }}
+      {{ mariadb_binary_name_shell }} --defaults-file=/my.cnf -h {{ mariadb_identifier }}"
+  tags:
+    - skip_ansible_lint
+
+# This is a hack.
+# See: https://ansibledaily.com/print-to-standard-output-without-escaping/
+#
+# We want to run `debug: msg=".."`, but that dumps it as JSON and escapes double quotes within it,
+# which ruins the command (`mariadb_import_command`)
+- name: Note about MariaDB importing
+  ansible.builtin.set_fact:
+    dummy: true
+  with_items:
+    - >-
+        Importing MariaDB database using the following command: `{{ mariadb_import_command }}`.
+        If this crashes, you can stop MariaDB (`systemctl stop {{ mariadb_identifier }}`),
+        delete the new database data (`rm -rf {{ mariadb_data_path }}`)
+        and restore the automatically-made backup (`mv {{ mariadb_auto_upgrade_backup_data_path }} {{ mariadb_data_path }}`).
+
+- name: Perform MariaDB database import
+  ansible.builtin.command:
+    cmd: "{{ mariadb_import_command }}"
+  register: mariadb_upgrade_mariadb_import_command_result
+  changed_when: mariadb_upgrade_mariadb_import_command_result.rc == 0
+
+- name: Delete MariaDB database dump file
+  ansible.builtin.file:
+    path: "{{ mariadb_dump_dir }}/{{ mariadb_dump_name }}"
+    state: absent
+
+- when: "mariadb_ensure_started_result.changed | bool"
+  name: Ensure MariaDB is stopped (if it previously was)
+  ansible.builtin.service:
+    name: "{{ mariadb_identifier }}"
+    state: stopped
+
+- name: Ensure services are started
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    daemon_reload: true
+  with_items: "{{ mariadb_systemd_services_to_stop_for_maintenance_list }}"
+
+- ansible.builtin.debug:
+    msg: "NOTE: Your old MariaDB data directory is preserved at `{{ mariadb_auto_upgrade_backup_data_path }}`. You might want to get rid of it once you've confirmed that all is well."

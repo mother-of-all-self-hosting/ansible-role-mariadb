@@ -30,6 +30,9 @@
 
 - when: mariadb_detected_existing_version_path != ''
   block:
+    - ansible.builtin.set_fact:
+        mariadb_detected_existing: true
+
     - name: Determine existing MariaDB version (read mysql_upgrade_info file)
       ansible.builtin.slurp:
         src: "{{ mariadb_detected_existing_version_path }}"
