@@ -50,7 +50,7 @@ mariadb_container_additional_networks_custom: []
 mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
 
 mariadb_db_name: ''
-mariadb_root_passsword: ''
+mariadb_root_password: ''
 mariadb_db_username: ''
 mariadb_db_password: ''
 
