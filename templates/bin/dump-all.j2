@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]; then
 	echo "Usage: "$0" <directory_path>"
-	echo "A latest-dump.sql.gz file will be dumped to the specified directory"
+	echo "A latest-dump.sql.zst file will be dumped to the specified directory"
 	exit 1
 fi
 
@@ -30,4 +30,4 @@ fi
 	--entrypoint=/bin/bash \
 	{{ mariadb_container_image_to_use }} \
 	-c \
-	'set -o pipefail && {{ mariadb_binary_name_dump }} --defaults-file=/my.cnf -h {{ mariadb_identifier }} --all-databases | gzip -c > /out/latest-dump.sql.gz'
+	'set -o pipefail && {{ mariadb_binary_name_dump }} --defaults-file=/my.cnf -h {{ mariadb_identifier }} --all-databases | zstd --stdout > /out/latest-dump.sql.zst'
