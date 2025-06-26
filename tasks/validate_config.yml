@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: (Deprecation) Catch and report renamed MariaDB settings
   ansible.builtin.fail:
     msg: >-
@@ -11,16 +10,16 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "item.old in vars"
   with_items:
-    - {'old': 'mariadb_root_passsword', 'new': 'mariadb_root_password'}
+    - { "old": "mariadb_root_passsword", "new": "mariadb_root_password" }
 
 - name: Fail if required MariaDB settings not defined
-  fail:
+  ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item.name }}`) for using this role.
   when: "item.when | bool and vars[item.name] | length == 0"
   with_items:
-    - {'name': 'mariadb_identifier', when: true}
-    - {'name': 'mariadb_uid', when: true}
-    - {'name': 'mariadb_gid', when: true}
-    - {'name': 'mariadb_container_network', when: true}
-    - {'name': 'mariadb_root_password', when: true}
+    - { "name": "mariadb_identifier", when: true }
+    - { "name": "mariadb_uid", when: true }
+    - { "name": "mariadb_gid", when: true }
+    - { "name": "mariadb_container_network", when: true }
+    - { "name": "mariadb_root_password", when: true }

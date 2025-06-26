@@ -3,12 +3,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Ensure MariaDB paths exist
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: "{{ mariadb_uid }}"
     group: "{{ mariadb_gid }}"
   with_items:
@@ -22,7 +21,7 @@
     dest: "{{ mariadb_base_path }}/{{ item }}"
     owner: "{{ mariadb_uid }}"
     group: "{{ mariadb_gid }}"
-    mode: 0640
+    mode: "0640"
   with_items:
     - env
     - my.cnf
@@ -45,7 +44,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/bin/{{ item }}.j2"
     dest: "{{ mariadb_bin_path }}/{{ item }}"
-    mode: 0750
+    mode: "0750"
   with_items:
     - cli
     - cli-non-interactive
@@ -83,7 +82,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/mariadb.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
-    mode: 0644
+    mode: "0644"
 
 - name: Ensure managed MariaDB databases prepared
   ansible.builtin.include_tasks:

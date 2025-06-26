@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 # This utility aims to determine if there is some existing MariaDB version in use or not.
 # If there is, it also tries to detect the container image that corresponds to that version.
 #
@@ -23,8 +22,8 @@
     path: "{{ mariadb_detection_mariadb_upgrade_info_path }}"
   register: result_mariadb_upgrade_info_stat
 
-- when: not result_mariadb_upgrade_info_stat.stat.exists
-  name: Determine existing MariaDB version (check mysql_upgrade_info file)
+- name: Determine existing MariaDB version (check mysql_upgrade_info file)
+  when: not result_mariadb_upgrade_info_stat.stat.exists
   ansible.builtin.stat:
     path: "{{ mariadb_detection_mysql_upgrade_info_path }}"
   register: result_mysql_upgrade_info_stat

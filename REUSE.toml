@@ -7,6 +7,9 @@ version = 1
 # Computer-generated files and other files which cannot be copyrighted
 [[annotations]]
 path = [
+    ".github/workflows/pre-commit.yml",
+    ".gitignore",
+    ".pre-commit-config.yaml",
     "meta/main.yml"
 ]
 SPDX-FileCopyrightText = "NONE"
