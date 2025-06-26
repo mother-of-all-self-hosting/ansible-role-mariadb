@@ -15,7 +15,7 @@
     - "{{ mariadb_bin_path }}"
     - "{{ mariadb_data_path }}"
 
-- name: Ensure MariaDB configuration files created
+- name: Ensure MariaDB support files installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ mariadb_base_path }}/{{ item }}"
@@ -35,12 +35,12 @@
 - ansible.builtin.set_fact:
     mariadb_container_image_to_use: "{{ mariadb_container_image_latest if mariadb_detected_version_corresponding_container_image == '' else mariadb_detected_version_corresponding_container_image }}"
 
-- name: Abort if on an unsupported MariaDB version
+- name: Abort if the enabled MariaDB version is no longer supported
   ansible.builtin.fail:
     msg: "You're on MariaDB {{ mariadb_detected_version }}, which is no longer supported."
   when: "mariadb_detected_version.startswith('10.9.')"
 
-- name: Ensure MariaDB scripts created
+- name: Ensure MariaDB scripts installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/bin/{{ item }}.j2"
     dest: "{{ mariadb_bin_path }}/{{ item }}"
@@ -50,7 +50,7 @@
     - cli-non-interactive
     - dump-all
 
-- name: Inject warning if on an old version of MariaDB
+- name: Inject warning if the enabled MariaDB version is not latest
   ansible.builtin.set_fact:
     devture_playbook_runtime_messages_list: |
       {{
@@ -78,7 +78,7 @@
     name: "{{ mariadb_container_network }}"
     driver: bridge
 
-- name: Ensure MariaDB service installed
+- name: Ensure MariaDB service systemd service is present
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/mariadb.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
