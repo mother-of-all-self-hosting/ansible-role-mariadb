@@ -3,27 +3,32 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- tags:
+- name: Perform MariaDB installation tasks
+  when: mariadb_enabled | bool
+  tags:
     - setup-all
     - setup-mariadb
     - install-all
     - install-mariadb
-
   block:
-    - when: mariadb_enabled | bool
+    - name: Validate MariaDB configuration
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - when: mariadb_enabled | bool
+    - name: Install MariaDB
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
-- tags:
+
+- name: Perform MariaDB uninstallation tasks
+  when: not mariadb_enabled | bool
+  tags:
     - setup-all
     - setup-mariadb
-
   block:
-    - when: not mariadb_enabled | bool
+    - name: Uninstall MariaDB
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
-- tags:
+
+- name: Perform MariaDB upgrade tasks
+  when: mariadb_enabled | bool
+  tags:
     - upgrade-mariadb
   block:
-    - when: mariadb_enabled | bool
+    - name: Upgrade MariaDB
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/upgrade.yml"
