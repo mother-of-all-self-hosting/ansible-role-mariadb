@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 - 2024 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 ---
 
 - name: Ensure MariaDB paths exist
@@ -88,4 +92,3 @@
       tags:
         - always
   when: "mariadb_managed_databases | length > 0"
-
