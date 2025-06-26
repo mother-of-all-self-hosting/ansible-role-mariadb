@@ -8,7 +8,8 @@
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
   register: mariadb_service_stat
 
-- when: mariadb_service_stat.stat.exists | bool
+- name: Uninstall MariaDB systemd service and scripts
+  when: mariadb_service_stat.stat.exists | bool
   block:
     - name: Ensure MariaDB systemd service is stopped
       ansible.builtin.service:
