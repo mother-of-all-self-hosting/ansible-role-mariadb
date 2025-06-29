@@ -13,6 +13,15 @@
       "matchPackageNames": ["/mariadb/"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
+    },
+    {
+      "matchPackageNames": [
+        "/ansible-lint/",
+        "/pre-commit-hooks/"
+      ],
+      "enabled": true,
+      "automerge": true,
+      "automergeType": "pr"
     }
   ],
   "customManagers": [
