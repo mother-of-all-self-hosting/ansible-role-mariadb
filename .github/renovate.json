@@ -21,7 +21,7 @@
       ],
       "enabled": true,
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "branch"
     }
   ],
   "customManagers": [
