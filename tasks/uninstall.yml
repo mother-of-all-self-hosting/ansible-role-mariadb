@@ -23,6 +23,14 @@
         path: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
         state: absent
 
+    - name: Ensure MariaDB support files do not exist
+      ansible.builtin.file:
+        path: "{{ mariadb_base_path }}/{{ item }}"
+        state: absent
+      with_items:
+        - env
+        - my.cnf
+
     - name: Ensure MariaDB scripts do not exist
       ansible.builtin.file:
         path: "{{ mariadb_bin_path }}"
