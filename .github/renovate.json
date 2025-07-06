@@ -19,7 +19,7 @@
       "enabled": true,
       "automerge": true,
       "automergeType": "branch",
-      "automergeSchedule": "automergeMonthly"
+      "schedule": ["* 0-3 1 * *"]
     }
   ],
   "customManagers": [
