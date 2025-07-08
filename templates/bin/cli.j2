@@ -7,11 +7,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 #!/bin/bash
 
 {{ devture_systemd_docker_base_host_command_docker }} run \
-	-it \
-	--rm \
-	--user={{ mariadb_uid }}:{{ mariadb_gid }} \
-	--cap-drop=ALL \
-	--mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro \
-	--network={{ mariadb_container_network }} \
-	{{ mariadb_container_image_to_use }} \
-	{{ mariadb_binary_name_shell }} --defaults-file=/my.cnf -h {{ mariadb_identifier }} {{ mariadb_db_name }}
+    -it \
+    --rm \
+    --user={{ mariadb_uid }}:{{ mariadb_gid }} \
+    --cap-drop=ALL \
+    --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro \
+    --network={{ mariadb_container_network }} \
+    {{ mariadb_container_image_to_use }} \
+    {{ mariadb_binary_name_shell }} --defaults-file=/my.cnf -h {{ mariadb_identifier }} {{ mariadb_db_name }}
