@@ -15,11 +15,11 @@
 - name: Fail if required MariaDB settings not defined
   ansible.builtin.fail:
     msg: >-
-      You need to define a required configuration setting (`{{ item.name }}`) for using this role.
-  when: "item.when | bool and vars[item.name] | length == 0"
+      You need to define a required configuration setting (`{{ item }}`).
+  when: "vars[item] == ''"
   with_items:
-    - { "name": "mariadb_identifier", when: true }
-    - { "name": "mariadb_uid", when: true }
-    - { "name": "mariadb_gid", when: true }
-    - { "name": "mariadb_container_network", when: true }
-    - { "name": "mariadb_root_password", when: true }
+    - mariadb_identifier
+    - mariadb_uid
+    - mariadb_gid
+    - mariadb_container_network
+    - mariadb_root_password
