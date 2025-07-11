@@ -45,6 +45,8 @@
     src: "{{ role_path }}/templates/bin/{{ item }}.j2"
     dest: "{{ mariadb_bin_path }}/{{ item }}"
     mode: "0750"
+    owner: "{{ mariadb_uid }}"
+    group: "{{ mariadb_gid }}"
   with_items:
     - cli
     - cli-non-interactive
