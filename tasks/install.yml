@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -26,13 +27,15 @@
     - env
     - my.cnf
 
-- ansible.builtin.import_tasks: "{{ role_path }}/tasks/detect_existing_version.yml"
+- name: Run the utility to determine if there is some existing MariaDB version in use or not
+  ansible.builtin.import_tasks: "{{ role_path }}/tasks/detect_existing_version.yml"
 
 # If we have found an existing version (installed from before), we use its corresponding container image.
 # If not, we install using the latest MariaDB.
 #
 # Upgrading is supposed to be performed separately and explicitly (see `upgrade_mariadb.yml`).
-- ansible.builtin.set_fact:
+- name: Determine the container image to use
+  ansible.builtin.set_fact:
     mariadb_container_image_to_use: "{{ mariadb_container_image_latest if mariadb_detected_version_corresponding_container_image == '' else mariadb_detected_version_corresponding_container_image }}"
 
 - name: Abort if the enabled MariaDB version is no longer supported

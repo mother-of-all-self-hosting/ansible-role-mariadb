@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -28,12 +29,15 @@
     path: "{{ mariadb_detection_mysql_upgrade_info_path }}"
   register: result_mysql_upgrade_info_stat
 
-- ansible.builtin.set_fact:
+- name: Detect existing MariaDB version path
+  ansible.builtin.set_fact:
     mariadb_detected_existing_version_path: "{{ mariadb_detection_mariadb_upgrade_info_path if result_mariadb_upgrade_info_stat.stat.exists else (mariadb_detection_mysql_upgrade_info_path if result_mysql_upgrade_info_stat is defined and result_mysql_upgrade_info_stat.stat.exists else '') }}"
 
-- when: mariadb_detected_existing_version_path != ''
+- name: Run if the existing MariaDB version path was detected
+  when: mariadb_detected_existing_version_path != ''
   block:
-    - ansible.builtin.set_fact:
+    - name: Set the fact that existing MariaDB was detected
+      ansible.builtin.set_fact:
         mariadb_detected_existing: true
 
     - name: Determine existing MariaDB version (read mysql_upgrade_info file)
