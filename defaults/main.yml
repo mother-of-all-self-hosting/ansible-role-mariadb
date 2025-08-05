@@ -52,6 +52,10 @@ mariadb_container_additional_networks: "{{ mariadb_container_additional_networks
 mariadb_container_additional_networks_auto: []
 mariadb_container_additional_networks_custom: []
 
+# Use label file if variable is set. Suggested path:
+# mariadb_label_file_path: "{{ mariadb_base_path }}/labels"
+mariadb_label_file_path: ''
+
 # Controls how long to wait for the container to stop gracefully before killing it.
 # Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
 # we default to at least 30 seconds.
