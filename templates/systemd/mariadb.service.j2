@@ -1,5 +1,5 @@
 {#
-SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -24,6 +24,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --log-driver=none \
       --user={{ mariadb_uid }}:{{ mariadb_gid }} \
       --network={{ mariadb_container_network }} \
+      {% if mariadb_container_mariadb_bind_port %}
+      -p {{ mariadb_container_mariadb_bind_port }}:3306 \
+      {% endif %}
       --env-file={{ mariadb_base_path }}/env \
       --mount type=bind,src={{ mariadb_data_path }},dst=/var/lib/mysql \
       --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/root/.my.cnf,ro \
