@@ -62,6 +62,9 @@ mariadb_container_additional_networks_custom: []
 # we default to at least 30 seconds.
 mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
 
+# A list of extra arguments to pass to the container
+mariadb_container_extra_arguments: []
+
 mariadb_db_name: ''
 mariadb_root_password: ''
 mariadb_db_username: ''
