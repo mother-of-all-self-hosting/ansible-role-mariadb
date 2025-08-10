@@ -18,11 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up MariaDB
 
-This is an [Ansible](https://www.ansible.com/) role which installs [MariaDB](https://mariadb.com) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [MariaDB](https://mariadb.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-MariaDB is an open-source column-oriented DBMS for online analytical processing (OLAP) that allows users to generate analytical reports using SQL queries in real-time.
+MariaDB is a powerful, open source object-relational database system.
 
-See the project's [documentation](https://mariadb.com/docs) to learn what MariaDB does and why it might be useful to you.
+See the project's [documentation](https://mariadb.org/documentation/) to learn what MariaDB does and why it might be useful to you.
 
 ## Adjusting the playbook configuration
 
@@ -55,10 +55,7 @@ There are some additional things you may wish to configure about the component.
 
 Take a look at:
 
-- [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `mariadb_environment_variables_additional_variables` variable
-  - See [this page](https://mariadb.com/docs/install/docker#configuration) for environment variables
-- [`templates/config.yaml.j2`](../templates/config.yaml.j2) for settings that you can customize via your `vars.yml` file with `mariadb_config_additional_configurations`
-  - See [this page](https://mariadb.com/docs/operations/server-configuration-parameters/settings) for a complete list of MariaDB's config options
+- [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file
 
 ## Installing
 
