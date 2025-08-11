@@ -84,6 +84,8 @@ You can then proceed to write queries. Example: `SELECT COUNT(*) FROM users;`
 >[!WARNING]
 > Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption. If you are not perfectly sure, create a backup!
 
+## Maintenance
+
 ### Backing up a database
 
 The script to dump the database (`dump-all`) is installed to the directory specified with `mariadb_bin_path`. It can dump the database to a path of your choosing.
