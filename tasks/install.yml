@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 - 2024 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -62,7 +62,7 @@
         devture_playbook_runtime_messages_list | default([])
         +
         [
-          "NOTE: Your setup is on an old MariaDB version ({{ mariadb_container_image_to_use }}), while {{ mariadb_container_image_latest }} is supported. You can upgrade using --tags=upgrade-mariadb"
+          "NOTE: Your setup is on an old MariaDB version (" + mariadb_container_image_to_use + "), while " + mariadb_container_image_latest + " is supported. You can upgrade using --tags=upgrade-mariadb"
         ]
       }}
   when: "mariadb_container_image_to_use != mariadb_container_image_latest"
