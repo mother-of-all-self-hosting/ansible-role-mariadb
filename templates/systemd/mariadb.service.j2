@@ -25,7 +25,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --user={{ mariadb_uid }}:{{ mariadb_gid }} \
       --network={{ mariadb_container_network }} \
       {% if mariadb_container_mariadb_bind_port %}
-      -p {{ mariadb_container_mariadb_bind_port }}:3306 \
+      -p {{ mariadb_container_mariadb_bind_port }}:{{ mariadb_connection_port }} \
       {% endif %}
       --env-file={{ mariadb_base_path }}/env \
       --mount type=bind,src={{ mariadb_data_path }},dst=/var/lib/mysql \
