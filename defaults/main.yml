@@ -66,6 +66,7 @@ mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_cont
 # A list of extra arguments to pass to the container
 mariadb_container_extra_arguments: []
 
+mariadb_connection_hostname: "{{ mariadb_identifier }}"
 mariadb_connection_port: 3306
 mariadb_db_name: ''
 mariadb_root_password: ''
