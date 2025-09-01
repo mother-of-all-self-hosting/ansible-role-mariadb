@@ -66,6 +66,6 @@
         devture_playbook_runtime_messages_list | default([])
         +
         [
-          "Note: You are not using a local MariaDB database, but some old data remains from before in `" + mariadb_data_path + "`. Feel free to delete it."
+          "Note: You are not using a local MariaDB database, but some old data remains from before in `" + mariadb_data_path + "`. Feel free to delete it. It can also be removed by running the playbook with the `delete-data-path-mariadb` tag."
         ]
       }}
