@@ -37,6 +37,18 @@
         path: "{{ mariadb_bin_path }}"
         state: absent
 
+    - name: Ensure MariaDB local data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ mariadb_data_path }}"
+      register: mariadb_data_path_deletion_result
+      changed_when: mariadb_data_path_deletion_result.rc == 0
+
+    - name: Ensure MariaDB base path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ mariadb_base_path }}"
+      register: mariadb_base_path_deletion_result
+      changed_when: mariadb_base_path_deletion_result.rc == 0
+
     - name: Ensure MariaDB container network does not exist via community.docker.docker_network
       when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
       community.docker.docker_network:
