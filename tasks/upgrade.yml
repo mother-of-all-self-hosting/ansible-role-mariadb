@@ -65,7 +65,7 @@
     daemon_reload: true
   with_items: "{{ mariadb_systemd_services_to_stop_for_maintenance_list }}"
 
-- name: Ensure MariaDB is started
+- name: Ensure MariaDB service is started
   ansible.builtin.service:
     name: "{{ mariadb_identifier }}"
     state: started
