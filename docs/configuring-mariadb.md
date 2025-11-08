@@ -40,7 +40,7 @@ To enable MariaDB with this role, add the following configuration to your `vars.
 mariadb_enabled: true
 
 # Put a strong password below, generated with `pwgen -s 64 1` or in another way
-mariadb_root_password: ''
+mariadb_root_password: ""
 
 ########################################################################
 #                                                                      #
