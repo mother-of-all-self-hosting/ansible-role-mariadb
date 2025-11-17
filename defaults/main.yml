@@ -36,7 +36,7 @@ mariadb_container_image_v10_11: "{{ mariadb_container_image_registry_prefix }}ma
 mariadb_container_image_v11_1: "{{ mariadb_container_image_registry_prefix }}mariadb:11.1.6"
 mariadb_container_image_v11_2: "{{ mariadb_container_image_registry_prefix }}mariadb:11.2.6"
 mariadb_container_image_v11_4: "{{ mariadb_container_image_registry_prefix }}mariadb:11.4.9"
-mariadb_container_image_v11_8: "{{ mariadb_container_image_registry_prefix }}mariadb:11.8.4"
+mariadb_container_image_v11_8: "{{ mariadb_container_image_registry_prefix }}mariadb:11.8.5"
 mariadb_container_image_v12_0: "{{ mariadb_container_image_registry_prefix }}mariadb:12.0.2"
 mariadb_container_image_latest: "{{ mariadb_container_image_v12_0 }}"
 
