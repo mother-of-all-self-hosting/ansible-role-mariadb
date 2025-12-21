@@ -14,8 +14,8 @@ mariadb_enabled: true
 # - the name of the main container network
 mariadb_identifier: 'mariadb'
 
-mariadb_uid: ''
-mariadb_gid: ''
+mariadb_uid: ""
+mariadb_gid: ""
 
 mariadb_base_path: "/{{ mariadb_identifier }}"
 mariadb_data_path: "{{ mariadb_base_path }}/data"
@@ -49,7 +49,7 @@ mariadb_container_image_force_pull: "{{ mariadb_container_image_to_use.endswith(
 # Specifies how the container publishes its MariaDB port
 #
 # Takes an "<ip>:<port>" value (e.g. "127.0.0.1:3306"), just a port number (to expose on all interfaces), or an empty string to not expose.
-mariadb_container_mariadb_bind_port: ''
+mariadb_container_mariadb_bind_port: ""
 
 mariadb_container_network: "{{ mariadb_identifier }}"
 
@@ -71,10 +71,10 @@ mariadb_container_extra_arguments_custom: []
 
 mariadb_connection_hostname: "{{ mariadb_identifier }}"
 mariadb_connection_port: 3306
-mariadb_db_name: ''
-mariadb_root_password: ''
-mariadb_db_username: ''
-mariadb_db_password: ''
+mariadb_db_name: ""
+mariadb_root_password: ""
+mariadb_db_username: ""
+mariadb_db_password: ""
 
 # A list of databases (and their credentials) that this role will create and manage on the server.
 #
