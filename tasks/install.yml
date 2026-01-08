@@ -20,9 +20,9 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ mariadb_base_path }}/{{ item }}"
+    mode: "0640"
     owner: "{{ mariadb_uid }}"
     group: "{{ mariadb_gid }}"
-    mode: "0640"
   with_items:
     - env
     - my.cnf
