@@ -64,6 +64,9 @@ mariadb_container_additional_networks_custom: []
 # we default to at least 30 seconds.
 mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
 
+# Specify the size of the container's tmpfs volume
+mariadb_container_tmpfs_tmp_size: 512m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 mariadb_container_extra_arguments: "{{ mariadb_container_extra_arguments_auto + mariadb_container_extra_arguments_custom }}"
 mariadb_container_extra_arguments_auto: []
