@@ -42,7 +42,7 @@ mariadb_container_image_v12_1: "{{ mariadb_container_image_registry_prefix }}mar
 mariadb_container_image_latest: "{{ mariadb_container_image_v12_1 }}"
 
 # This variable is assigned at runtime. Overriding its value has no effect.
-mariadb_container_image_to_use: '{{ mariadb_container_image_latest }}'
+mariadb_container_image_to_use: "{{ mariadb_container_image_latest }}"
 
 mariadb_container_image_force_pull: "{{ mariadb_container_image_to_use.endswith(':latest') }}"
 
