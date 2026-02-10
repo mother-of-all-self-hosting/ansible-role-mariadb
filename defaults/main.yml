@@ -32,7 +32,7 @@ mariadb_container_image_registry_prefix: docker.io/
 # create a PR for obsolete tags which are not mentioned at https://hub.docker.com/_/mariadb.
 # Adding a line as below or editing the existing line is required for major or minor updates.
 mariadb_container_image_v10_10: "{{ mariadb_container_image_registry_prefix }}mariadb:10.10.7"
-mariadb_container_image_v10_11: "{{ mariadb_container_image_registry_prefix }}mariadb:10.11.15"
+mariadb_container_image_v10_11: "{{ mariadb_container_image_registry_prefix }}mariadb:10.11.16"
 mariadb_container_image_v11_1: "{{ mariadb_container_image_registry_prefix }}mariadb:11.1.6"
 mariadb_container_image_v11_2: "{{ mariadb_container_image_registry_prefix }}mariadb:11.2.6"
 mariadb_container_image_v11_4: "{{ mariadb_container_image_registry_prefix }}mariadb:11.4.9"
