@@ -46,12 +46,16 @@ mariadb_container_image_to_use: "{{ mariadb_container_image_latest }}"
 
 mariadb_container_image_force_pull: "{{ mariadb_container_image_to_use.endswith(':latest') }}"
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+mariadb_container_network: "{{ mariadb_identifier }}"
+
+# Control if the container network is deleted on uninstalling.
+mariadb_container_network_deletion_enabled: true
+
 # Specify how the container publishes its MariaDB port
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:3306"), just a port number (to expose on all interfaces), or an empty string to not expose.
 mariadb_container_mariadb_bind_port: ""
-
-mariadb_container_network: "{{ mariadb_identifier }}"
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
