@@ -26,6 +26,7 @@
   with_items:
     - env
     - my.cnf
+  register: mariadb_support_files_result
 
 - name: Run the utility to determine if there is some existing MariaDB version in use or not
   ansible.builtin.import_tasks: "{{ role_path }}/tasks/detect_existing_version.yml"
@@ -54,6 +55,7 @@
     - cli
     - cli-non-interactive
     - dump-all
+  register: mariadb_scripts_result
 
 - name: Inject warning if the enabled MariaDB version is not latest
   ansible.builtin.set_fact:
@@ -115,6 +117,7 @@
     src: "{{ role_path }}/templates/systemd/mariadb.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
     mode: "0644"
+  register: mariadb_systemd_service_result
 
 - name: Ensure managed MariaDB databases prepared
   ansible.builtin.include_tasks:
@@ -123,3 +126,15 @@
       tags:
         - always
   when: "mariadb_managed_databases | length > 0"
+  register: mariadb_databases_preparation_result
+
+- name: Determine whether MariaDB needs a restart
+  ansible.builtin.set_fact:
+    mariadb_restart_necessary: >-
+      {{
+        mariadb_support_files_result.changed | default(false)
+        or mariadb_scripts_result.changed | default(false)
+        or mariadb_systemd_service_result.changed | default(false)
+        or mariadb_container_image_pull_result.changed | default(false)
+        or mariadb_databases_preparation_result.changed | default(false)
+      }}
