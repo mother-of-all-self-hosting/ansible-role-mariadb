@@ -63,11 +63,6 @@ mariadb_container_additional_networks: "{{ mariadb_container_additional_networks
 mariadb_container_additional_networks_auto: []
 mariadb_container_additional_networks_custom: []
 
-# Controls how long to wait for the container to stop gracefully before killing it.
-# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
-# we default to at least 30 seconds.
-mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
-
 # Specify the size of the container's tmpfs volume
 mariadb_container_tmpfs_tmp_size: 512m
 
@@ -133,6 +128,39 @@ mariadb_systemd_wanted_services_list: "{{ mariadb_systemd_wanted_services_list_d
 mariadb_systemd_wanted_services_list_default: []
 mariadb_systemd_wanted_services_list_auto: []
 mariadb_systemd_wanted_services_list_custom: []
+
+# Controls how long to wait for the container to stop gracefully before killing it.
+# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
+# we default to at least 30 seconds.
+mariadb_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
+
+# Controls how long the pre-start cleanup should wait for stale container-name release
+# before failing startup explicitly.
+mariadb_container_cleanup_timeout_seconds: "{{ devture_systemd_docker_base_container_cleanup_timeout_seconds }}"
+
+# Controls the delay between pre-start cleanup retries.
+mariadb_container_cleanup_retry_delay_seconds: "{{ devture_systemd_docker_base_container_cleanup_retry_delay_seconds }}"
+
+# Shell command used in the systemd pre-start phase to deterministically remove a stale
+# container and wait until Docker releases its name.
+mariadb_container_cleanup_command: |
+  i=0;
+  while [ "$i" -lt {{ mariadb_container_cleanup_timeout_seconds }} ]; do
+  {{ devture_systemd_docker_base_host_command_docker }} stop -t {{ mariadb_container_stop_grace_time_seconds }} {{ mariadb_identifier }} >/dev/null 2>&1 || true;
+  {{ devture_systemd_docker_base_host_command_docker }} rm -f {{ mariadb_identifier }} >/dev/null 2>&1 || true;
+  if {{ devture_systemd_docker_base_host_command_docker }} container inspect {{ mariadb_identifier }} >/dev/null 2>&1; then
+  i=$((i + 1));
+  sleep {{ mariadb_container_cleanup_retry_delay_seconds }};
+  continue;
+  fi;
+  if {{ devture_systemd_docker_base_host_command_docker }} info >/dev/null 2>&1; then
+  exit 0;
+  fi;
+  echo "Failed to query Docker daemon while cleaning up {{ mariadb_identifier }}" >&2;
+  exit 1;
+  done;
+  echo "Failed to remove stale container {{ mariadb_identifier }} after {{ mariadb_container_cleanup_timeout_seconds }} attempts" >&2;
+  exit 1
 
 # Specify the timezone
 mariadb_environment_variables_tz: UTC
