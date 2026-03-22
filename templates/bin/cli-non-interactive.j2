@@ -1,5 +1,7 @@
 {#
 SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Nikita Chernyi
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -11,6 +13,16 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     --user={{ mariadb_uid }}:{{ mariadb_gid }} \
     --cap-drop=ALL \
     --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/my.cnf,ro \
+    {% if mariadb_cli_use_unix_socket_enabled %}
+    --mount type=bind,src={{ mariadb_run_path }},dst={{ mariadb_run_path_in_container }} \
+    {% else %}
     --network={{ mariadb_container_network }} \
+    {% endif %}
     {{ mariadb_container_image_to_use }} \
-    {{ mariadb_binary_name_shell }} --defaults-file=/my.cnf -h {{ mariadb_connection_hostname }} {{ mariadb_db_name }}
+    {{ mariadb_binary_name_shell }} --defaults-file=/my.cnf \
+    {% if mariadb_cli_use_unix_socket_enabled %}
+    --socket={{ mariadb_run_path_in_container }}/mysqld.sock \
+    {% else %}
+    -h {{ mariadb_connection_hostname }} \
+    {% endif %}
+    {{ mariadb_db_name }}

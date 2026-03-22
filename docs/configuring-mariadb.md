@@ -84,6 +84,12 @@ You can then proceed to write queries. Example: `SELECT COUNT(*) FROM users;`
 >[!WARNING]
 > Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption. If you are not perfectly sure, create a backup!
 
+### Configuring Unix socket support
+
+By default the role is configured to bind-mount the MariaDB Unix socket directory to the host at `mariadb_run_path`. It can be disabled by setting `mariadb_container_unix_socket_enabled` to `false`.
+
+It is also possible to control if helper CLI scripts should prefer Unix socket connections (when available) instead of TCP connection with the `mariadb_cli_use_unix_socket_enabled` variable. This does not affect server behavior.
+
 ## Maintenance
 
 ### Backing up a database

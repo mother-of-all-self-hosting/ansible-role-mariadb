@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 Nikita Chernyi
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -15,6 +16,16 @@
     - "{{ mariadb_base_path }}"
     - "{{ mariadb_bin_path }}"
     - "{{ mariadb_data_path }}"
+
+- name: Ensure MariaDB run path exists
+  # NOTE: tasks to create paths are split in order to set different permissions for Unix socket access
+  when: mariadb_container_unix_socket_enabled
+  ansible.builtin.file:
+    path: "{{ mariadb_run_path }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ mariadb_uid }}"
+    group: "{{ mariadb_gid }}"
 
 - name: Ensure MariaDB support files installed
   ansible.builtin.template:
