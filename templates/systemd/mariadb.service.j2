@@ -1,5 +1,7 @@
 {#
-SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Nikita Chernyi
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -32,6 +34,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --env-file={{ mariadb_base_path }}/env \
       --mount type=bind,src={{ mariadb_data_path }},dst=/var/lib/mysql \
       --mount type=bind,src={{ mariadb_base_path }}/my.cnf,dst=/root/.my.cnf,ro \
+      {% if mariadb_container_unix_socket_enabled %}
+      --mount type=bind,src={{ mariadb_run_path }},dst={{ mariadb_run_path_in_container }} \
+      {% endif %}
       --tmpfs=/tmp:rw,noexec,nosuid,size={{ mariadb_container_tmpfs_tmp_size }} \
       {% for arg in mariadb_container_extra_arguments %}
       {{ arg }} \

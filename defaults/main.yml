@@ -1,4 +1,6 @@
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2026 Nikita Chernyi
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -19,6 +21,8 @@ mariadb_gid: ""
 
 mariadb_base_path: "/{{ mariadb_identifier }}"
 mariadb_data_path: "{{ mariadb_base_path }}/data"
+# The host path where the MariaDB Unix socket directory is mounted (when enabled).
+mariadb_run_path: "{{ mariadb_base_path }}/run"
 mariadb_bin_path: "{{ mariadb_base_path }}/bin"
 
 # This variable points to the mysql/mariadb binary. Newer versions (11.x+) use `mariadb`, not `mysql`.
@@ -65,6 +69,18 @@ mariadb_container_additional_networks_custom: []
 
 # Specify the size of the container's tmpfs volume
 mariadb_container_tmpfs_tmp_size: 512m
+
+# Controls whether the MariaDB Unix socket directory is bind-mounted from the host.
+# When enabled, the socket will be available under `mariadb_run_path` on the host,
+# while TCP connections keep working as usual.
+mariadb_container_unix_socket_enabled: true
+
+# Specify the Unix socket directory inside the container
+mariadb_run_path_in_container: /run/mysqld
+
+# Controls whether the helper CLI scripts prefer Unix socket connections (when available)
+# instead of TCP. This does not affect server behavior.
+mariadb_cli_use_unix_socket_enabled: "{{ mariadb_container_unix_socket_enabled }}"
 
 # A list of extra arguments to pass to the container (`docker create` command)
 mariadb_container_extra_arguments: "{{ mariadb_container_extra_arguments_auto + mariadb_container_extra_arguments_custom }}"
@@ -149,6 +165,7 @@ mariadb_container_cleanup_command: |
   {{ devture_systemd_docker_base_host_command_docker }} stop -t {{ mariadb_container_stop_grace_time_seconds }} {{ mariadb_identifier }} >/dev/null 2>&1 || true;
   {{ devture_systemd_docker_base_host_command_docker }} rm -f {{ mariadb_identifier }} >/dev/null 2>&1 || true;
   if {{ devture_systemd_docker_base_host_command_docker }} container inspect {{ mariadb_identifier }} >/dev/null 2>&1; then
+  rm -f {{ mariadb_run_path }}/mysql.sock >/dev/null 2>&1 || true;
   i=$((i + 1));
   sleep {{ mariadb_container_cleanup_retry_delay_seconds }};
   continue;
