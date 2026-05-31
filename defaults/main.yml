@@ -35,6 +35,7 @@ mariadb_container_image_registry_prefix: docker.io/
 # Note that renovate.json is configured to detect patch updates only for safety, and Renovate will not
 # create a PR for obsolete tags which are not mentioned at https://hub.docker.com/_/mariadb.
 # Adding a line as below or editing the existing line is required for major or minor updates.
+# When adding a line below, you typically would need to adjust tasks/detect_existing_version.yml as well.
 mariadb_container_image_v10_10: "{{ mariadb_container_image_registry_prefix }}mariadb:10.10.7"
 mariadb_container_image_v10_11: "{{ mariadb_container_image_registry_prefix }}mariadb:10.11.18"
 mariadb_container_image_v11_1: "{{ mariadb_container_image_registry_prefix }}mariadb:11.1.6"
