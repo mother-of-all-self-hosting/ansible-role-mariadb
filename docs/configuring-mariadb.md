@@ -20,7 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 This is an [Ansible](https://www.ansible.com/) role which installs [MariaDB](https://mariadb.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-MariaDB is a powerful, open source object-relational database system.
+MariaDB is a powerful, open-source object-relational database system.
 
 See the project's [documentation](https://mariadb.org/documentation/) to learn what MariaDB does and why it might be useful to you.
 
