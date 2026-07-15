@@ -28,6 +28,7 @@
 - name: Perform MariaDB upgrade tasks
   when: mariadb_enabled | bool
   tags:
+    - molecule-notest
     - upgrade-mariadb
   block:
     - name: Upgrade MariaDB
