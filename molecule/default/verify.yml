@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify MariaDB systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for MariaDB service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: mariadb.service
+      register: mariadb_service
+      until: mariadb_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert MariaDB service is active
+      ansible.builtin.assert:
+        that: mariadb_service.status.ActiveState == 'active'
+        fail_msg: "mariadb.service not active ({{ mariadb_service.status.ActiveState }})"
+        success_msg: "mariadb.service is active"
+
+    - name: Retrieve MariaDB service log for debugging
+      when: mariadb_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu mariadb.service
+      changed_when: false
+
+    - name: Show MariaDB systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "MariaDB systemd: {{ mariadb_service.status.ActiveState }}"
