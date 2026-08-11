@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Check existence of MariaDB systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ mariadb_identifier }}.service"
+  register: mariadb_service_stat
+
+- name: Check existence of MariaDB support files
+  ansible.builtin.stat:
+    path: "{{ mariadb_base_path }}/{{ item }}"
+  with_items:
+    - env
+    - my.cnf
+  register: mariadb_files_stat
+
+- name: Check existence of MariaDB container network
+  community.docker.docker_network_info:
+    name: "{{ mariadb_container_network }}"
+  register: mariadb_network_stat
+
+- name: Run if either systemd service, files or container network for MariaDB exist
+  when: mariadb_service_stat.stat.exists or (mariadb_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists', 'equalto', true) | list | length > 0) or mariadb_network_stat.exists
+  block:
+    - name: Notify that MariaDB needs uninstalling at first
+      ansible.builtin.fail:
+        msg: "You need to complete uninstalling of MariaDB before deleting `{{ mariadb_data_path }}` with this task."
+
+- name: Run if neither systemd service, files nor container network for MariaDB exist
+  when: not mariadb_service_stat.stat.exists and not (mariadb_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists', 'equalto', true) | list | length > 0) and not mariadb_network_stat.exists
+  block:
+    - name: Ensure MariaDB data path does not exist
+      ansible.builtin.file:
+        path: "{{ mariadb_data_path }}"
+        state: absent
+
+    # `rmdir` is a command to remove empty directories
+    # See: https://www.linux.org/docs/man1/rmdir.html
+    - name: Ensure MariaDB base path does not exist if empty
+      ansible.builtin.command: "rmdir {{ mariadb_base_path }}"
+      register: rmdir_result
+      changed_when: rmdir_result.rc == 0
+      failed_when: rmdir_result.rc != 0 and 'No such file or directory' not in rmdir_result.stderr
