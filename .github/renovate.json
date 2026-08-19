@@ -1,44 +1,45 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
+    ":automergeAll",
+    ":automergeBranch",
     ":semanticCommitsDisabled"
+  ],
+  "ignorePresets": [
+    "docker:pinDigests",
+    ":maintainLockFilesWeekly"
   ],
   "labels": [
     "dependencies"
   ],
-  "separateMinorPatch": true,
+  "ansible-galaxy": {
+    "ignoreUnstable": false,
+    "versioning": "loose"
+  },
+  "pre-commit": {
+    "enabled": true
+  },
+  "regex": {
+    "automerge": false
+  },
   "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "commitBody": "[skip ci]",
+      "schedule": ["* * 1-7 */6 *"],
+      "automergeSchedule": ["* * 1-14 */6 *"],
+      "groupName": "GitHub Actions dependencies"
+    },
+    {
+      "matchManagers": ["mise", "pip_requirements", "pre-commit", "pyenv"],
+      "schedule": ["* * 1-7 */6 *"],
+      "automergeSchedule": ["* * 1-14 */6 *"]
+    },
     {
       "matchPackageNames": ["/mariadb/"],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
-    },
-    {
-      "matchFileNames": [
-        ".github/workflows/close-stale-issues.yml",
-        ".github/workflows/molecule.yml",
-        ".github/workflows/pre-commit.yml",
-        ".pre-commit-config.yaml",
-        ".python-version",
-        "mise.toml",
-        "molecule/requirements.txt"
-      ],
-      "enabled": true,
-      "automerge": true,
-      "automergeType": "branch",
-      "schedule": ["* * 1 */6 *"],
-      "automergeSchedule": ["* * 1-14 */6 *"]
-    },
-    {
-      "matchFileNames": [
-        "molecule/**/requirements.yml"
-      ],
-      "enabled": true,
-      "automerge": true,
-      "automergeType": "branch",
-      "ignoreUnstable": false,
-      "versioning": "loose"
     }
   ],
   "customManagers": [
@@ -54,11 +55,5 @@
       "datasourceTemplate": "docker",
       "versioningTemplate": "semver"
     }
-  ],
-  "pre-commit": {
-    "enabled": true
-  },
-  "pyenv": {
-    "enabled": true
-  }
+  ]
 }
