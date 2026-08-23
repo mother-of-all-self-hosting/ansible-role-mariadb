@@ -3,6 +3,7 @@
   "extends": [
     "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
   ],
+  "separateMinorPatch": true,
   "packageRules": [
     {
       "description": "A new MariaDB major or minor becomes a new variable, never a bump of an old one",
@@ -18,7 +19,7 @@
         "/defaults/main.yml$/"
       ],
       "matchStrings": [
-        "(?<name>[A-Za-z0-9_]+):\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
+        "mariadb_container_image_v\\d+_\\d+:\\s*\"[^\"]*mariadb:(?<currentValue>[^\"]+)\""
       ],
       "depNameTemplate": "mariadb",
       "datasourceTemplate": "docker",
