@@ -8,6 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
 {{ devture_systemd_docker_base_host_command_docker }} run \
+    -i \
     --rm \
     --user={{ mariadb_uid }}:{{ mariadb_gid }} \
     --cap-drop=ALL \
