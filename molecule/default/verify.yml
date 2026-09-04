@@ -199,11 +199,11 @@
           but {{ mariadb_latest_image_variable }} pins {{ mariadb_expected_version }}
         success_msg: "MariaDB reports {{ mariadb_version_query.stdout | trim }}"
 
-    - name: Show MariaDB verification summary
+    - name: Show the MariaDB verification summary
       ansible.builtin.debug:
         msg:
           - "MariaDB systemd: {{ mariadb_service.status.ActiveState }}"
-          - "Round-trip: {{ mariadb_roundtrip.stdout | trim }}"
-          - "Managed database round-trip: {{ mariadb_managed_roundtrip.stdout | trim }}"
-          - "cli-non-interactive: {{ mariadb_cli_non_interactive.stdout | trim }}"
-          - "Version: {{ mariadb_version_query.stdout | trim }} (expected {{ mariadb_expected_version }} from {{ mariadb_latest_image_variable }})"
+          - "MariaDB version: {{ mariadb_version_query.stdout | trim }} (expected {{ mariadb_expected_version }} from {{ mariadb_latest_image_variable }})"
+          - "MariaDB round-trip: {{ mariadb_roundtrip.stdout | trim }}"
+          - "MariaDB managed database round-trip: {{ mariadb_managed_roundtrip.stdout | trim }}"
+          - "MariaDB cli-non-interactive: {{ mariadb_cli_non_interactive.stdout | trim }}"
