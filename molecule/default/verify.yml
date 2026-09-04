@@ -191,12 +191,10 @@
       changed_when: false
 
     # The reported version carries an upstream suffix (`12.1.2-MariaDB-ubu2404`).
-    - name: Assert the running MariaDB is the version the role installs
+    - name: Assert the running MariaDB is the version this role installs
       ansible.builtin.assert:
         that: (mariadb_version_query.stdout | trim).startswith(mariadb_expected_version)
-        fail_msg: >-
-          MariaDB reports {{ mariadb_version_query.stdout | trim }},
-          but {{ mariadb_latest_image_variable }} pins {{ mariadb_expected_version }}
+        fail_msg: "MariaDB reports {{ mariadb_version_query.stdout | trim }}, {{ mariadb_latest_image_variable }} expected {{ mariadb_expected_version }}"
         success_msg: "MariaDB reports {{ mariadb_version_query.stdout | trim }}"
 
     - name: Show the MariaDB verification summary
