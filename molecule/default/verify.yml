@@ -30,7 +30,7 @@
     # what is wanted anyway. What is wanted is the version literal that
     # Renovate rewrites, so the defaults are read as text and the pointer is
     # followed by name to the series variable that holds it.
-    - name: Read the MariaDB role defaults as text
+    - name: Parse the MariaDB role defaults as text
       ansible.builtin.set_fact:
         mariadb_defaults_text: "{{ lookup('file', lookup('env', 'MOLECULE_PROJECT_DIRECTORY') ~ '/defaults/main.yml') }}"
 
