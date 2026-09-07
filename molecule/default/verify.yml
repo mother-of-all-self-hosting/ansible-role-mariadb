@@ -181,7 +181,7 @@
     # Tying the running server to the version pinned in defaults/main.yml is
     # what makes this scenario a real test of the version that Renovate bumps:
     # a bump that produces an unusable image cannot pass here.
-    - name: Query the version reported by the running MariaDB
+    - name: Query the version of the running MariaDB
       ansible.builtin.command:
         cmd: >-
           docker exec {{ mariadb_defaults.mariadb_identifier }}
