@@ -193,21 +193,21 @@
           docker exec {{ mariadb_defaults.mariadb_identifier }}
           mariadb -u root -p{{ mariadb_root_password }} --batch --skip-column-names
           -e "SELECT VERSION()"
-      register: mariadb_version_query
+      register: mariadb_version_reported
       changed_when: false
 
     # The reported version carries an upstream suffix (`12.1.2-MariaDB-ubu2404`).
     - name: Assert the running MariaDB is the version this role installs
       ansible.builtin.assert:
-        that: (mariadb_version_query.stdout | trim).startswith(mariadb_expected_version)
-        fail_msg: "MariaDB reports {{ mariadb_version_query.stdout | trim }}, {{ mariadb_latest_image_variable }} expected {{ mariadb_expected_version }}"
-        success_msg: "MariaDB reports {{ mariadb_version_query.stdout | trim }}"
+        that: (mariadb_version_reported.stdout | trim).startswith(mariadb_expected_version)
+        fail_msg: "MariaDB reports {{ mariadb_version_reported.stdout | trim }}, {{ mariadb_latest_image_variable }} expected {{ mariadb_expected_version }}"
+        success_msg: "MariaDB reports {{ mariadb_version_reported.stdout | trim }}"
 
     - name: Show the MariaDB verification summary
       ansible.builtin.debug:
         msg:
           - "MariaDB systemd: {{ mariadb_service.status.ActiveState }}"
-          - "MariaDB version: {{ mariadb_version_query.stdout | trim }}"
+          - "MariaDB version: {{ mariadb_version_reported.stdout | trim }}"
           - "MariaDB round-trip: {{ mariadb_roundtrip.stdout | trim }}"
           - "MariaDB managed database round-trip: {{ mariadb_managed_roundtrip.stdout | trim }}"
           - "MariaDB cli-non-interactive: {{ mariadb_cli_non_interactive.stdout | trim }}"
