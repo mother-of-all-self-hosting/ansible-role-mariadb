@@ -13,6 +13,9 @@
   vars:
     mariadb_managed_database: "{{ mariadb_managed_databases_custom | first }}"
 
+    mariadb_verify_units:
+      - mariadb.service
+
   tasks:
     - name: Verify that MariaDB works
       block:
@@ -44,13 +47,14 @@
           ansible.builtin.set_fact:
             mariadb_expected_version: "{{ mariadb_defaults_text | regex_findall(mariadb_latest_image_variable ~ ':[^\\n]*mariadb:([0-9][^\"]*)\"') | first }}"
 
-        - name: Wait for the MariaDB systemd service to become active (up to 180s)
+        - name: Wait for the MariaDB systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: mariadb.service
-          register: mariadb_service
-          until: mariadb_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: mariadb_services
+          until: mariadb_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ mariadb_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -58,17 +62,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the MariaDB systemd service is active
+        - name: Assert the MariaDB systemd services are active
           ansible.builtin.assert:
-            that: mariadb_service.status.ActiveState == 'active'
-            fail_msg: "mariadb.service is not active ({{ mariadb_service.status.ActiveState }})"
-            success_msg: "mariadb.service is active"
+            that: mariadb_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(mariadb_verify_units | zip(mariadb_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the MariaDB systemd service log for debugging
+        - name: Retrieve the MariaDB systemd services log for debugging
           when: mariadb_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=mariadb.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ mariadb_verify_units }}"
 
         # A systemd unit reaching "active" only means that `docker start` has not
         # exited yet. The server still has a startup of its own to go through - on
@@ -208,7 +215,7 @@
         - name: Show the MariaDB verification summary
           ansible.builtin.debug:
             msg:
-              - "MariaDB systemd: {{ mariadb_service.status.ActiveState }}"
+              - "MariaDB systemd: {% for unit, state in mariadb_verify_units | zip(mariadb_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "MariaDB version: {{ mariadb_version_reported.stdout | trim }}"
               - "MariaDB round-trip: {{ mariadb_roundtrip.stdout | trim }}"
               - "MariaDB managed database round-trip: {{ mariadb_managed_roundtrip.stdout | trim }}"
