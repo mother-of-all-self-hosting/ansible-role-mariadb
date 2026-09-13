@@ -31,6 +31,7 @@ provisioner:
       all:
         # Helper variables
         mariadb_debug_service_enabled: false
+        mariadb_restarts_check_enabled: true
 
         # Variables for MariaDB
         mariadb_uid: 1000
