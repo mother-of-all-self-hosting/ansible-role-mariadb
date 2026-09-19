@@ -87,6 +87,12 @@ mariadb_container_extra_arguments: "{{ mariadb_container_extra_arguments_auto + 
 mariadb_container_extra_arguments_auto: []
 mariadb_container_extra_arguments_custom: []
 
+# A list of extra arguments to pass to the process inside the container
+# Example: ['--SOME_ARGUMENT']
+mariadb_process_extra_arguments: "{{ mariadb_process_extra_arguments_auto + mariadb_process_extra_arguments_custom }}"
+mariadb_process_extra_arguments_auto: []
+mariadb_process_extra_arguments_custom: []
+
 mariadb_connection_hostname: "{{ mariadb_identifier }}"
 mariadb_connection_port: 3306
 mariadb_db_name: ""
