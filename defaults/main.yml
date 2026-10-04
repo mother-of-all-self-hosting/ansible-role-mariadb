@@ -135,7 +135,11 @@ mariadb_managed_databases_default_collation: utf8mb4_unicode_ci
 # and before trying to run queries for initializing managed databases/users against it.
 #
 # For most (subsequent) runs, MariaDB would already be running, so no waiting will be happening at all.
-mariadb_managed_databases_service_start_wait_timeout_seconds: 15
+#
+# With `mariadb_systemd_readiness_check_enabled`, no waiting is needed at all: starting the systemd service
+# only completes once MariaDB accepts connections (see the `ExecStartPost` in the systemd service template),
+# so any fixed delay on top of that would only slow things down.
+mariadb_managed_databases_service_start_wait_timeout_seconds: "{{ 0 if mariadb_systemd_readiness_check_enabled | bool else 15 }}"
 
 # mariadb_systemd_services_to_stop_for_maintenance_list specifies the list of systemd services to stop before upgrading or vacuuming (for certain vacuum operations).
 # These services will be restarted after the operation completes.

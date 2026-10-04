@@ -49,9 +49,10 @@
     mariadb_auto_upgrade_backup_data_path: "{{ mariadb_data_path }}-auto-upgrade-backup"
   when: "mariadb_auto_upgrade_backup_data_path | default('') == ''"
 
+# No waiting is needed with the readiness check (see `mariadb_managed_databases_service_start_wait_timeout_seconds`).
 - name: Set mariadb_start_wait_time, if not provided
   ansible.builtin.set_fact:
-    mariadb_start_wait_time: 15
+    mariadb_start_wait_time: "{{ 0 if mariadb_systemd_readiness_check_enabled | bool else 15 }}"
   when: "mariadb_start_wait_time | default('') == ''"
 
 - name: Set mariadb_force_upgrade, if not provided
@@ -103,7 +104,7 @@
   register: mariadb_ensure_started_result
 
 - name: Wait a bit, so that MariaDB can start
-  when: mariadb_ensure_started_result.changed | bool
+  when: "mariadb_ensure_started_result.changed | bool and (mariadb_start_wait_time | int) > 0"
   ansible.builtin.wait_for:
     timeout: "{{ mariadb_start_wait_time }}"
   delegate_to: 127.0.0.1
@@ -159,6 +160,7 @@
     daemon_reload: true
 
 - name: Wait a bit, so that MariaDB can start
+  when: "(mariadb_start_wait_time | int) > 0"
   ansible.builtin.wait_for:
     timeout: "{{ mariadb_start_wait_time }}"
   delegate_to: 127.0.0.1
