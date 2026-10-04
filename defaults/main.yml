@@ -157,6 +157,15 @@ mariadb_systemd_wanted_services_list_default: []
 mariadb_systemd_wanted_services_list_auto: []
 mariadb_systemd_wanted_services_list_custom: []
 
+# Controls whether the systemd service only counts as started once MariaDB accepts connections,
+# so that services ordered after it (`After=`) do not find it still initializing.
+# See the `ExecStartPost` in the systemd service template for how this is checked.
+mariadb_systemd_readiness_check_enabled: true
+
+# Controls how long to wait for MariaDB to accept connections.
+# If it does not within this time, the service counts as started anyway.
+mariadb_systemd_readiness_check_timeout_seconds: 300
+
 # Controls how long to wait for the container to stop gracefully before killing it.
 # Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
 # we default to at least 30 seconds.
