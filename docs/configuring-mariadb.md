@@ -1,17 +1,20 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024 MDAD project contributors
-SPDX-FileCopyrightText: 2020 - 2024 Slavi Pantaleev
-SPDX-FileCopyrightText: 2020 Aaron Raimist
+SPDX-FileCopyrightText: 2019-2024 Slavi Pantaleev
 SPDX-FileCopyrightText: 2020 Chris van Dijk
 SPDX-FileCopyrightText: 2020 Dominik Zajac
+SPDX-FileCopyrightText: 2020 Hardy Erlinger
 SPDX-FileCopyrightText: 2020 Mickaël Cornière
+SPDX-FileCopyrightText: 2020, 2021 Aaron Raimist
+SPDX-FileCopyrightText: 2020-2024 MDAD project contributors
+SPDX-FileCopyrightText: 2021 Marc Leuser
 SPDX-FileCopyrightText: 2022 François Darveau
 SPDX-FileCopyrightText: 2022 Julian Foad
 SPDX-FileCopyrightText: 2022 Warren Bailey
 SPDX-FileCopyrightText: 2023 Antonis Christofides
 SPDX-FileCopyrightText: 2023 Felix Stupp
 SPDX-FileCopyrightText: 2023 Pierre 'McFly' Marty
-SPDX-FileCopyrightText: 2024 - 2025 Suguru Hirahara
+SPDX-FileCopyrightText: 2024 Kim Brose
+SPDX-FileCopyrightText: 2024-2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
@@ -73,6 +76,9 @@ After running the command for installation, the MariaDB instance becomes availab
 
 ### Getting a database terminal
 
+>[!WARNING]
+> **Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption.** When in doubt, consider making a backup. You might also want to use a web user interface software like [Adminer](https://www.adminer.org/) and [phpMyAdmin](https://www.phpmyadmin.net/).
+
 You can use the CLI installed to the directory specified with `mariadb_bin_path` (default: `/mariadb/bin/`) for getting interactive terminal access to the MariaDB server.
 
 To see the available databases, run `SHOW DATABASES`.
@@ -80,9 +86,6 @@ To see the available databases, run `SHOW DATABASES`.
 To change to another existing database (for example `miniflux`), run `USE miniflux`.
 
 You can then proceed to write queries. Example: `SELECT COUNT(*) FROM users;`
-
->[!WARNING]
-> Modifying the database directly (especially as services are running) is dangerous and may lead to irreversible database corruption. If you are not perfectly sure, create a backup!
 
 ### Configuring Unix socket support
 
