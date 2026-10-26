@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify the MariaDB helper scripts
+  hosts: all
+  become: true
+  gather_facts: false
+
+
+  tasks:
+    - name: Run a query through the CLI scripts
+      ansible.builtin.command:
+        argv: "{{ item.argv }}"
+        stdin: "{{ item.stdin | default(omit) }}"
+      register: mariadb_verify_cli
+      changed_when: false
+      loop:
+        - argv: [/mariadb/bin/cli, --batch, --skip-column-names]
+          stdin: SELECT CURRENT_USER();
+        - argv: [/mariadb/bin/cli-non-interactive, --batch, --skip-column-names, --execute=SELECT CURRENT_USER()]
+
+    - name: Assert the CLI scripts run queries as root
+      ansible.builtin.assert:
+        that: mariadb_verify_cli.results | map(attribute='stdout') | map('regex_search', '^root@') | select | list | length == 2
+        fail_msg: "The CLI scripts did not run the query as root: {{ mariadb_verify_cli.results | map(attribute='stdout') | list }}"
+        success_msg: "The CLI scripts run queries as root"

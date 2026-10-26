@@ -279,3 +279,6 @@
 
 - name: Verify MariaDB managed databases
   ansible.builtin.import_playbook: verify_managed_databases.yml
+
+- name: Verify the MariaDB helper scripts
+  ansible.builtin.import_playbook: verify_helper_scripts.yml
