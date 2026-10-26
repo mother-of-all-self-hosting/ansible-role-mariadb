@@ -25,6 +25,15 @@
     - name: Uninstall MariaDB
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
 
+- name: Perform MariaDB data path deletion tasks
+  when: not mariadb_enabled | bool
+  tags:
+    - delete-data-path-all
+    - delete-data-path-mariadb
+  block:
+    - name: Delete MariaDB data path
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/delete_data_path.yml"
+
 - name: Perform MariaDB upgrade tasks
   when: mariadb_enabled | bool
   tags:
