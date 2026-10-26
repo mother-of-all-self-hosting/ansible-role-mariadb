@@ -8,6 +8,8 @@
   become: true
   gather_facts: false
 
+  vars:
+    mariadb_verify_dump_directory: /root/molecule-dump
 
   tasks:
     - name: Run a query through the CLI scripts
@@ -26,3 +28,35 @@
         that: mariadb_verify_cli.results | map(attribute='stdout') | map('regex_search', '^root@') | select | list | length == 2
         fail_msg: "The CLI scripts did not run the query as root: {{ mariadb_verify_cli.results | map(attribute='stdout') | list }}"
         success_msg: "The CLI scripts run queries as root"
+
+    - name: Ensure the dump directory exists
+      ansible.builtin.file:
+        path: "{{ mariadb_verify_dump_directory }}"
+        state: directory
+        mode: "0700"
+
+    - name: Dump all databases via the dump-all script
+      ansible.builtin.command:
+        cmd: /mariadb/bin/dump-all {{ mariadb_verify_dump_directory }}
+      changed_when: true
+
+    # zstd may not be available on the host, so the dump is checked in the MariaDB container.
+    - name: Read the start of the dump
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail
+          && docker exec -i mariadb sh -c 'zstd --test && echo valid'
+          < {{ mariadb_verify_dump_directory }}/latest-dump.sql.zst
+          && docker exec -i mariadb sh -c 'zstd -dc | head -n 5'
+          < {{ mariadb_verify_dump_directory }}/latest-dump.sql.zst
+        executable: /bin/bash
+      register: mariadb_verify_dump
+      changed_when: false
+
+    - name: Assert the dump is a complete MariaDB dump
+      ansible.builtin.assert:
+        that:
+          - mariadb_verify_dump.stdout_lines[0] == 'valid'
+          - mariadb_verify_dump.stdout is search('MariaDB dump')
+        fail_msg: "The dump is not a complete MariaDB dump: {{ mariadb_verify_dump.stdout }}{{ mariadb_verify_dump.stderr }}"
+        success_msg: "The dump-all script makes a complete MariaDB dump"
