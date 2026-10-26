@@ -18,6 +18,9 @@ if [ ! -d "$directory_path" ]; then
     exit 1
 fi
 
+# The dump holds every database (including password hashes), so only the caller may read it.
+umask 077
+
 dump_path="$directory_path/latest-dump.sql.zst"
 
 # Runs the dump inside the (running) MariaDB container, connecting over TCP to 127.0.0.1 (like the managed databases preparation does),
