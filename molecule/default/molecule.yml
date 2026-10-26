@@ -43,14 +43,16 @@ provisioner:
         # Variables for MariaDB
         mariadb_uid: 1000
         mariadb_gid: 1000
-        mariadb_root_password: password
+        # Not a common word: it is masked (as a `no_log` value) wherever it shows
+        # up in task results, including inside the module's descriptions of its changes.
+        mariadb_root_password: molecule-root-password
 
         # Creating a database and a user for it is what playbooks actually ask
         # this role to do, so the scenario asks for one too. It exercises
-        # tasks/util/prepare_managed_database.yml and the SQL template it
-        # renders, and gives the verifier an unprivileged account to log in
-        # with. Molecule interpolates this file - comments included - so a
-        # literal `$$` has to be written doubled, and these values avoid it.
+        # tasks/util/prepare_managed_databases.yml and the module it runs, and
+        # gives the verifier an unprivileged account to log in with. Molecule
+        # interpolates this file - comments included - so a literal `$$` has to
+        # be written doubled, and these values avoid it.
         mariadb_managed_databases_custom:
           - name: molecule_db
             username: molecule_user
@@ -68,14 +70,7 @@ scenario:
     - create
     - prepare
     - converge
-    # Preparing a managed database renders an SQL file, feeds it to the
-    # server and deletes it again, and reports itself as changed every time.
-    # The statements it runs are all `IF NOT EXISTS`/`GRANT`, so the effect is
-    # idempotent even though the tasks do not report themselves that way, and
-    # nothing here can make them report otherwise. Dropping the managed
-    # database from this scenario would buy the idempotence check back at the
-    # cost of no longer testing what playbooks actually ask this role for.
-    # - idempotence
+    - idempotence
     - side_effect
     - verify
     - cleanup

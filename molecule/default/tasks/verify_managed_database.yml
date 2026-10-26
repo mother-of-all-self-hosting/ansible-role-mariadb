@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+# Over TCP like a service would, so that the `'username'@'%'` account is the one which applies.
+- name: Log in to the managed database as its user ({{ mariadb_verify_case }})
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --env=MYSQL_PWD={{ item }}
+      - mariadb
+      - mariadb
+      - --user={{ mariadb_verify_managed_db.username }}
+      - --protocol=tcp
+      - --host=127.0.0.1
+      - --batch
+      - --skip-column-names
+      - --execute=SELECT CURRENT_USER()
+      - "{{ mariadb_verify_managed_db.name }}"
+  register: mariadb_verify_logins
+  changed_when: false
+  failed_when: false
+  loop:
+    - "{{ mariadb_verify_password }}"
+    - "{{ mariadb_verify_wrong_password }}"
+
+- name: Assert the managed database is prepared ({{ mariadb_verify_case }})
+  ansible.builtin.assert:
+    that:
+      - mariadb_managed_databases_preparation_result.changes == mariadb_verify_expected_changes
+      - mariadb_managed_databases_preparation_result.changed == (mariadb_verify_expected_changes | length > 0)
+      - mariadb_verify_logins.results[0].rc == 0
+      - mariadb_verify_logins.results[0].stdout == mariadb_verify_managed_db.username ~ '@%'
+      - mariadb_verify_logins.results[1].rc != 0
+    fail_msg: >-
+      After {{ mariadb_verify_case }}:
+      changes {{ mariadb_managed_databases_preparation_result.changes }} (expected {{ mariadb_verify_expected_changes }}),
+      login with the expected password (rc={{ mariadb_verify_logins.results[0].rc }}):
+      `{{ mariadb_verify_logins.results[0].stdout }}{{ mariadb_verify_logins.results[0].stderr }}`,
+      login with the other password (rc={{ mariadb_verify_logins.results[1].rc }})
+    success_msg: >-
+      After {{ mariadb_verify_case }}: changes {{ mariadb_managed_databases_preparation_result.changes }},
+      and `{{ mariadb_verify_managed_db.username }}` can log in with the expected password only

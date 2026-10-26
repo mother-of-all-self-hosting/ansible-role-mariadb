@@ -141,6 +141,11 @@ mariadb_managed_databases_default_collation: utf8mb4_unicode_ci
 # so any fixed delay on top of that would only slow things down.
 mariadb_managed_databases_service_start_wait_timeout_seconds: "{{ 0 if mariadb_systemd_readiness_check_enabled | bool else 15 }}"
 
+# Controls how many times (and how often) to retry connecting to MariaDB when preparing managed databases,
+# in case it does not accept connections yet (e.g. when it takes longer to start than expected).
+mariadb_managed_databases_connection_retries: 10
+mariadb_managed_databases_connection_retry_delay_seconds: 3
+
 # mariadb_systemd_services_to_stop_for_maintenance_list specifies the list of systemd services to stop before upgrading or vacuuming (for certain vacuum operations).
 # These services will be restarted after the operation completes.
 mariadb_systemd_services_to_stop_for_maintenance_list: "{{ mariadb_systemd_services_to_stop_for_maintenance_list_auto + mariadb_systemd_services_to_stop_for_maintenance_list_custom }}"
